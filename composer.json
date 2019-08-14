@@ -1,0 +1,23 @@
+{
+    "name": "gurkanbicer/advanced-dns",
+    "description": "It collects DNS results using dig command.",
+    "keywords": ["dns", "dns lookup", "dig"],
+    "authors": [
+        {
+            "name": "Gürkan Biçer",
+            "email": "gurkan@grkn.co"
+        }
+    ],
+    "type": "project",
+    "require": {
+		"php": ">=7.1",
+        "symfony/process": "^4.3"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Gurkanbicer\\AdvancedDns\\": "src/"
+        }
+    }
+}
