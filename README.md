@@ -11,6 +11,17 @@ It collects DNS results using dig command.
 - SOA
 - TXT
 
+### Installation
+
+```
+composer require gurkanbicer\advanced-dns
+```
+
+```php
+require 'vendor/autoload.php';
+use \Gurkanbicer\AdvancedDns\AdvancedDns;
+```
+
 ### Samples
 
 If dns server don't respond or query not successful, false will return. If query successful, results will return as an array.
