@@ -14,7 +14,7 @@ It collects DNS results using dig command.
 ### Installation
 
 ```
-composer require gurkanbicer\advanced-dns
+composer require gurkanbicer/advanced-dns
 ```
 
 ```php
