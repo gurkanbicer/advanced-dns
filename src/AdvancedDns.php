@@ -93,7 +93,7 @@ Class AdvancedDns
      */
     protected function getAuthorityCmd($host, $type, $nameserver = null)
     {
-        $command = 'dig +nocmd +noall +multiline +authority +additional {HOST} {TYPE} {NS}';
+        $command = 'dig +nocmd +noall +multiline +authority +additional +comments {HOST} {TYPE} {NS}';
         $command = str_ireplace(['{HOST}', '{TYPE}'], [$host, $type], $command);
         if (!is_null($nameserver))
             $command = str_ireplace('{NS}', '@' . $nameserver, $command);
@@ -166,67 +166,91 @@ Class AdvancedDns
                 else
                     $explResult = explode("\n", $rawResult);
 
-                $lines = [];
-                foreach ($explResult as $item) {
-                    if ($item != '') {
-                        $lines[] = str_ireplace(["\t\t", "\t"], " ", $item);
+                // fetch header and status
+                $header = [];
+                for ($i=0; $i < 6; $i++) {
+                    if ($explResult[$i] != '') {
+                        $header[] = $explResult[$i];
+                        unset($explResult[$i]);
+                    } else {
+                        unset($explResult[$i]);
                     }
                 }
+                $explHeader = explode(',', $header[1]);
+                $headerStatus = trim(str_replace('status:', '', $explHeader[1]));
+                ksort($explResult);
 
-                $actualResult = [];
-                $actualResult['type'] = 'DOMAINNS';
-
-                $countAType = 0;
-                foreach ($lines as $line) {
-                    $explLine = explode(' ', $line);
-                    if ($explLine[3] == 'NS') {
-                        $host = rtrim($explLine[4], '.');
-                        if (!isset($actualResult['response'][$host])) {
-                            $actualResult['response'][$host] = [
-                                'ttl' => (int) $explLine[1],
-                                'data' => []
-                            ];
+                if ($headerStatus == "NOERROR") {
+                    $lines = [];
+                    foreach ($explResult as $item) {
+                        if ($item != ''
+                            && substr($item, 0, 1) != ';') {
+                            $lines[] = str_ireplace(["\t\t", "\t"], " ", $item);
                         }
                     }
 
-                    if ($explLine[3] == 'A') {
-                        $countAType++;
-                        $host = rtrim($explLine[0], '.');
-                        $actualResult['response'][$host]['data'][] = $explLine[4];
+                    $actualResult = [];
+                    $actualResult['type'] = 'DOMAINNS';
+
+                    $countAType = 0;
+                    foreach ($lines as $line) {
+                        $explLine = explode(' ', $line);
+                        if ($explLine[3] == 'NS') {
+                            $host = rtrim($explLine[4], '.');
+                            if (!isset($actualResult['response'][$host])) {
+                                $actualResult['response'][$host] = [
+                                    'ttl' => (int) $explLine[1],
+                                    'data' => []
+                                ];
+                            }
+                        }
+
+                        if ($explLine[3] == 'A') {
+                            $countAType++;
+                            $host = rtrim($explLine[0], '.');
+                            $actualResult['response'][$host]['data'][] = $explLine[4];
+                        }
                     }
-                }
 
-                if ($countAType == 0) {
-                    foreach ($actualResult['response'] as $key => $value) {
-                        $command2 = $this->getAnswerCmd($key, 'A', null);
-                        $process2 = new Process($command2);
-                        $process2->setTimeout(1);
-                        $process2->run();
+                    if ($countAType == 0) {
+                        foreach ($actualResult['response'] as $key => $value) {
+                            $command2 = $this->getAnswerCmd($key, 'A', null);
+                            $process2 = new Process($command2);
+                            $process2->setTimeout(1);
+                            $process2->run();
 
-                        if ($process2->isSuccessful()) {
-                            $rawResult2 = $process2->getOutput();
-                            if ($rawResult2 === '')
-                                return false;
-                            else
-                                $explResult2 = explode("\n", $rawResult2);
+                            if ($process2->isSuccessful()) {
+                                $rawResult2 = $process2->getOutput();
+                                if ($rawResult2 === '')
+                                    return false;
+                                else
+                                    $explResult2 = explode("\n", $rawResult2);
 
-                            $lines2 = [];
-                            foreach ($explResult2 as $item2) {
-                                if ($item2 != '') {
-                                    $lines2[] = str_ireplace(["\t\t", "\t"], " ", $item2);
+                                $lines2 = [];
+                                foreach ($explResult2 as $item2) {
+                                    if ($item2 != '') {
+                                        $lines2[] = str_ireplace(["\t\t", "\t"], " ", $item2);
+                                    }
+                                }
+
+                                foreach ($lines2 as $line2) {
+                                    $explLine2 = explode(' ', $line2);
+                                    $actualResult['response'][$key]['data'][] = $explLine2[4];
                                 }
                             }
-
-                            foreach ($lines2 as $line2) {
-                                $explLine2 = explode(' ', $line2);
-                                $actualResult['response'][$key]['data'][] = $explLine2[4];
-                            }
                         }
                     }
+                    $actualResult['status'] = $headerStatus;
+                    $actualResult['nameserver'] = $nameservers[0];
+                    return $actualResult;
+                } else {
+                    $actualResult = [];
+                    $actualResult['type'] = 'DOMAINNS';
+                    $actualResult['response'] = [];
+                    $actualResult['status'] = $headerStatus;
+                    $actualResult['nameserver'] = $nameservers[0];
+                    return $actualResult;
                 }
-
-                $actualResult['nameserver'] = $nameservers[0];
-                return $actualResult;
             }
         } else {
             return false;
