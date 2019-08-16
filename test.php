@@ -7,3 +7,4 @@ var_dump($result);
 $domain = new AdvancedDns('getdns.sh');
 $result = $domain->authorityNameserverLookup();
 var_dump($result);
+var_dump($domain->getErrors());
