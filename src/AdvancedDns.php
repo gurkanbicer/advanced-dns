@@ -6,7 +6,7 @@
  * @author Gürkan Biçer <gurkan@grkn.co>
  * @link https://github.com/gurkanbicer/advanced-dns
  * @license MIT (https://opensource.org/licenses/MIT)
- * @version 0.1.2
+ * @version 0.2
  */
 
 namespace Gurkanbicer\AdvancedDns;
@@ -341,6 +341,7 @@ Class AdvancedDns
                 $actualResults['type'] = $type;
                 $actualResults['status'] = $status;
                 $actualResults['nameserver'] = $nameserver;
+                $actualResults['response'] = [];
                 switch ($type) {
                     case 'A':
                         foreach ($lines as $line) {
@@ -449,8 +450,6 @@ Class AdvancedDns
                                     }
                                 }
                             }
-                        } else {
-                            $actualResults['response'] = [];
                         }
                         break;
                     case 'TXT':
