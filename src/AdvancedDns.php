@@ -6,7 +6,7 @@
  * @author Gürkan Biçer <gurkan@grkn.co>
  * @link https://github.com/gurkanbicer/advanced-dns
  * @license MIT (https://opensource.org/licenses/MIT)
- * @version 0.2
+ * @version 0.2.1
  */
 
 namespace Gurkanbicer\AdvancedDns;
@@ -210,6 +210,7 @@ Class AdvancedDns
 
                 $actualResults = [];
                 $actualResults['type'] = 'DOMAINNS';
+                $actualResults['response'] = [];
                 $countAType = 0;
 
                 foreach ($lines as $line) {
@@ -223,43 +224,47 @@ Class AdvancedDns
                                 'data' => []
                             ];
                         }
-                    }
-                    if ($explLine[3] == 'A') {
+                    } elseif ($explLine[3] == 'A') {
                         $countAType++;
                         $host = rtrim($explLine[0], '.');
                         $actualResults['response'][$host]['data'][] = $explLine[4];
+                    } else {
+                        break;
                     }
                 }
 
                 // if domain pointing different nameservers
-                if ($countAType == 0) {
-                    foreach ($actualResults['response'] as $key => $value) {
-                        $command2 = $this->getAnswerCmd($key, 'A', null);
-                        $command2 = str_ireplace('+comments', '', $command2);
-                        $process2 = new Process($command2);
-                        $process2->setTimeout(1);
-                        $process2->run();
+                if (!empty($actualResults['response'])) {
+                    if ($countAType == 0) {
+                        foreach ($actualResults['response'] as $key => $value) {
+                            $command2 = $this->getAnswerCmd($key, 'A', null);
+                            $command2 = str_ireplace('+comments', '', $command2);
+                            $process2 = new Process($command2);
+                            $process2->setTimeout(1);
+                            $process2->run();
 
-                        if ($process2->isSuccessful()) {
-                            $outputSnapshot2 = $process2->getOutput();
-                            if ($outputSnapshot2 === '')
-                                continue;
-                            else
-                                $explResult2 = explode("\n", $outputSnapshot2);
+                            if ($process2->isSuccessful()) {
+                                $outputSnapshot2 = $process2->getOutput();
+                                if ($outputSnapshot2 === '')
+                                    continue;
+                                else
+                                    $explResult2 = explode("\n", $outputSnapshot2);
 
-                            $lines2 = [];
-                            foreach ($explResult2 as $item2) {
-                                if ($item2 != '') {
-                                    $lines2[] = str_ireplace(["\t\t", "\t"], " ", $item2);
+                                $lines2 = [];
+                                foreach ($explResult2 as $item2) {
+                                    if ($item2 != '') {
+                                        $lines2[] = str_ireplace(["\t\t", "\t"], " ", $item2);
+                                    }
                                 }
-                            }
 
-                            foreach ($lines2 as $line2) {
-                                $explLine2 = explode(' ', $line2);
-                                $actualResults['response'][$key]['data'][] = $explLine2[4];
+                                foreach ($lines2 as $line2) {
+                                    $explLine2 = explode(' ', $line2);
+                                    $actualResults['response'][$key]['data'][] = $explLine2[4];
+                                }
                             }
                         }
                     }
+
                 }
 
                 $actualResults['status'] = $status;
