@@ -6,7 +6,7 @@
  * @author Gürkan Biçer <gurkan@grkn.co>
  * @link https://github.com/gurkanbicer/advanced-dns
  * @license MIT (https://opensource.org/licenses/MIT)
- * @version 0.2.1
+ * @version 0.2.2
  */
 
 namespace Gurkanbicer\AdvancedDns;
@@ -121,14 +121,15 @@ Class AdvancedDns
     }
 
     /**
+     * @param int $timeout
      * @return array|bool
      */
-    protected function getAuthorityServers()
+    protected function getAuthorityServers($timeout = 1)
     {
         if ($this->hasError() === false) {
             $command = $this->getRootCmd($this->tld);
             $process = new Process($command);
-            $process->setTimeout(1);
+            $process->setTimeout($timeout);
             $process->run();
             if (!$process->isSuccessful()) {
                 return false;
@@ -153,9 +154,10 @@ Class AdvancedDns
     }
 
     /**
+     * @param int $timeout
      * @return array|bool
      */
-    public function authorityNameserverLookup()
+    public function authorityNameserverLookup($timeout = 1)
     {
         try {
             if ($this->hasError())
@@ -167,7 +169,7 @@ Class AdvancedDns
 
             $command = $this->getAuthorityCmd($this->domain, 'NS', $this->authorityServers[0]);
             $process = new Process($command);
-            $process->setTimeout(1);
+            $process->setTimeout($timeout);
             $process->run();
 
             if (!$process->isSuccessful())
@@ -240,7 +242,7 @@ Class AdvancedDns
                             $command2 = $this->getAnswerCmd($key, 'A', null);
                             $command2 = str_ireplace('+comments', '', $command2);
                             $process2 = new Process($command2);
-                            $process2->setTimeout(1);
+                            $process2->setTimeout($timeout);
                             $process2->run();
 
                             if ($process2->isSuccessful()) {
@@ -288,9 +290,10 @@ Class AdvancedDns
     /**
      * @param string $type
      * @param null $nameserver
+     * @param int $timeout
      * @return array|bool
      */
-    public function lookup($type = '', $nameserver = null)
+    public function lookup($type = '', $nameserver = null, $timeout = 1)
     {
         try {
             if ($this->hasError())
@@ -301,7 +304,7 @@ Class AdvancedDns
 
             $command = $this->getAnswerCmd($this->domain, $type, $nameserver);
             $process = new Process($command);
-            $process->setTimeout(1);
+            $process->setTimeout($timeout);
             $process->run();
 
             if (!$process->isSuccessful())
@@ -407,7 +410,7 @@ Class AdvancedDns
                                     $command2 = $this->getAnswerCmd($host, 'A', null);
                                     $command2 = str_ireplace('+comments', '', $command2);
                                     $process2 = new Process($command2);
-                                    $process2->setTimeout(1);
+                                    $process2->setTimeout($timeout);
                                     $process2->run();
 
                                     if ($process2->isSuccessful()) {
