@@ -353,7 +353,7 @@ Class AdvancedDns
                 switch ($type) {
                     case 'A':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'A') {
                                 $actualResults['response'][] = [
                                     'ttl' => (int)$explLine[1],
@@ -364,7 +364,7 @@ Class AdvancedDns
                         break;
                     case 'AAAA':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'AAAA') {
                                 $actualResults['response'][] = [
                                     'ttl' => (int)$explLine[1],
@@ -375,7 +375,7 @@ Class AdvancedDns
                         break;
                     case 'CNAME':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'CNAME') {
                                 $actualResults['response'][] = [
                                     'ttl' => (int)$explLine[1],
@@ -386,7 +386,7 @@ Class AdvancedDns
                         break;
                     case 'MX':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'MX') {
                                 $actualResults['response'][] = [
                                     'ttl' => (int)$explLine[1],
@@ -398,7 +398,7 @@ Class AdvancedDns
                         break;
                     case 'NS':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'NS') {
                                 $host = rtrim($explLine[4], '.');
                                 if (!isset($actualResults['response'][$host])) {
@@ -437,7 +437,7 @@ Class AdvancedDns
                         }
                         break;
                     case 'SOA':
-                        $explLine1 = explode(' ', $lines[0]);
+                        $explLine1 = preg_split('/[\s]+/', $lines[0]);
                         if ($explLine1[3] == 'SOA') {
                             $actualResults['response']['primaryNs'] = rtrim($explLine1[4], '.');
                             $actualResults['response']['hostmaster'] = rtrim($explLine1[5], '.');
@@ -462,7 +462,7 @@ Class AdvancedDns
                         break;
                     case 'TXT':
                         foreach ($lines as $line) {
-                            $explLine = explode(' ', $line);
+                            $explLine = preg_split('/[\s]+/', $line);
                             if ($explLine[3] == 'TXT') {
                                 $ttl = $explLine[1];
                                 unset($explLine[0], $explLine[1], $explLine[2], $explLine[3]);
