@@ -91,7 +91,9 @@ Class AdvancedDns
         $command = str_ireplace(['{HOST}', '{TYPE}'], [$host, $type], $command);
         if (!is_null($nameserver))
             $command = str_ireplace('{NS}', '@' . $nameserver, $command);
-        return $command;
+
+        $commandToArr = explode(' ', $command);
+        return $commandToArr;
     }
 
     /**
@@ -106,7 +108,8 @@ Class AdvancedDns
         $command = str_ireplace(['{HOST}', '{TYPE}'], [$host, $type], $command);
         if (!is_null($nameserver))
             $command = str_ireplace('{NS}', '@' . $nameserver, $command);
-        return $command;
+        $commandToArr = explode(' ', $command);
+        return $commandToArr;
     }
 
     /**
@@ -117,7 +120,8 @@ Class AdvancedDns
     {
         $command = 'dig +nocmd +noall +multiline +answer +short NS {HOST}';
         $command = str_ireplace('{HOST}', $tld, $command);
-        return $command;
+        $commandToArr = explode(' ', $command);
+        return $commandToArr;
     }
 
     /**
