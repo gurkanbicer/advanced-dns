@@ -10,8 +10,8 @@
     ],
     "type": "project",
     "require": {
-		"php": ">=7.1",
-        "symfony/process": "^4.3"
+		"php": ">=7.3",
+        "symfony/process": "^5.3"
     },
     "require-dev": {
     },
